@@ -30,16 +30,15 @@ def Main():
                        "\n To learn about what AJA means, type WHAT DOES AJA MEAN? \n To quit at any time, type QUIT" \
                        "\nNote: Commands are NOT case-sensitive."
         conn.send(instructions.encode())
-        print(state)
         state = 1
-        print(state)
+
         while state != 0:
             data = conn.recv(1024).decode()
             command = str(data).upper()
             print(command)
             if not data or command == "QUIT":
                 return #get out of connection loop
-            if state == 1:
+            if state == 1: #waiting on initial command
                 if command == "WHAT DOES AJA MEAN?":
                     data_out = "(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A" \
                                "(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A" \
@@ -204,7 +203,7 @@ def Main():
                     data_out = "Sorry, that is not a valid command. Try: JOKE PLEASE, KNOCK KNOCK, or WHAT DOES " \
                                "AJA MEAN? to proceed, or type QUIT to quit"
 
-            elif state == 2:
+            elif state == 2:#user has joke please path
                 if command == "WHO'S THERE?":
                     setup = "Tank"
                     data_out = setup
@@ -219,6 +218,14 @@ def Main():
                 else:
                     data_out = "Sorry, that is not a valid command. Try:" + setup + " WHO?, or type QUIT to quit"
 
+            elif state == 4:#user has chosen knock knock path
+                setup = data
+                data_out = setup + " who?"
+                state = 5
+            elif state == 5:
+                punchline = data
+                data_out = setup + " : " + punchline
+                state = 6
             if state == 6:
                 data_out = data_out + "\nWould you like to continue using AJA? YES/NO"
                 print(data_out)
@@ -227,14 +234,10 @@ def Main():
                 if command == "YES":
                     state = 0
                     break
+                elif command == "NO":
+                    return
 
             conn.send(data_out.encode())
-
-        data = str(data).upper()
-        #print("Received from User: " + str(data))
-
-        data_out = data
-        conn.send(data_out.encode())
 
     conn.close()
 

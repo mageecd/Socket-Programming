@@ -16,13 +16,13 @@ def Main():
         if str(message).upper() == 'QUIT':
             break
         mySocket.send(message.encode())
-        print("sending: " + message)
         if str(message).upper() == 'WHAT DOES AJA MEAN?':
             data = mySocket.recv(16384).decode()
         else:
             data = mySocket.recv(4096).decode()
         print(data)
-
+        if not data:
+            break
     mySocket.close()
 
 if __name__ == '__main__':
