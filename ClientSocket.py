@@ -8,14 +8,20 @@ def Main():
     mySocket = socket.socket()
     mySocket.connect((host, port))
 
-    message = input(" ? ")
+    data = mySocket.recv(4096).decode()
+    print(data)
 
-    while message != 'q':
+    while True:
+        message = input("Input: ")
+        if str(message).upper() == 'QUIT':
+            break
         mySocket.send(message.encode())
-        data = mySocket.recv(1024).decode()
-
-        print ('Received from server: ' + data)
-        message = input(" ? ")
+        print("sending: " + message)
+        if str(message).upper() == 'WHAT DOES AJA MEAN?':
+            data = mySocket.recv(16384).decode()
+        else:
+            data = mySocket.recv(4096).decode()
+        print(data)
 
     mySocket.close()
 
