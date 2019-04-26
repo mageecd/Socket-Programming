@@ -1,11 +1,33 @@
 import socket
 import time
+import random
 
 
-def Main():
+def write_dictionary(dictionary):
+    file = open("jokefile.txt", "w")
+    for key in dictionary:
+        line = key + " | " + "; ".join(dictionary[key]) + "\n"
+        file.write(line)
+    file.close()
+
+def main():
     host = '127.0.0.1' #localhost
     #host = "165.22.150.177" #server's host IP
     port = 4001 #server listens on this port
+
+    jokeDictionary = {} #a dictionary to store all the jokes
+    inputFile = open("jokefile.txt", "r") #file to save the jokes
+
+    for aline in inputFile:  # go through each line of the input
+        setupList = [x.strip() for x in aline.split("|")]  # split the name from the classes
+        punchlineList = [x.strip() for x in setupList[1].split(";")]  # split the classes into their own items
+        if setupList[0] not in jokeDictionary:
+            jokeDictionary[setupList[0]] = punchlineList
+        else:
+            jokeDictionary[setupList[0]] = jokeDictionary[setupList[0]] + punchlineList
+
+    print(jokeDictionary)
+    inputFile.close()
 
     mySocket = socket.socket()
     mySocket.bind((host, port))
@@ -26,7 +48,7 @@ def Main():
         6: end message
         7: waiting on user to restart"""
     while True:
-        instructions = "To hear a knock-knock joke, type JOKE PLEASE. \n To tell a knock-knock joke, type 'KNOCK KNOCK.'" \
+        instructions = "To hear a knock-knock joke, type JOKE PLEASE. \n To tell a knock-knock joke, type KNOCK KNOCK." \
                        "\n To learn about what AJA means, type WHAT DOES AJA MEAN? \n To quit at any time, type QUIT" \
                        "\nNote: Commands are NOT case-sensitive."
         conn.send(instructions.encode())
@@ -35,8 +57,8 @@ def Main():
         while state != 0:
             data = conn.recv(1024).decode()
             command = str(data).upper()
-            print(command)
             if not data or command == "QUIT":
+                write_dictionary(jokeDictionary)
                 return #get out of connection loop
             if state == 1: #waiting on initial command
                 if command == "WHAT DOES AJA MEAN?":
@@ -205,18 +227,20 @@ def Main():
 
             elif state == 2:#user has joke please path
                 if command == "WHO'S THERE?":
-                    setup = "Tank"
+                    setup = random.choice(list(jokeDictionary))
                     data_out = setup
                     state = 3
                 else:
                     data_out = "Sorry, that is not a valid command. Try: WHO'S THERE?, or type QUIT to quit"
             elif state == 3:
                 if command == str(setup).upper() + " WHO?":
-                    punchline = "You're welcome!"
+                    randomNum = random.randint(0, len(jokeDictionary[setup]) - 1)
+                    punchline = jokeDictionary[setup][randomNum]
                     data_out = punchline
                     state = 6
                 else:
-                    data_out = "Sorry, that is not a valid command. Try:" + setup + " WHO?, or type QUIT to quit"
+                    data_out = "Sorry, that is not a valid command. Try:" + str(setup).upper() + " WHO?, or type QUIT " \
+                                                                                                 "to quit"
 
             elif state == 4:#user has chosen knock knock path
                 setup = data
@@ -224,23 +248,28 @@ def Main():
                 state = 5
             elif state == 5:
                 punchline = data
-                data_out = setup + " : " + punchline
+                if setup not in jokeDictionary:
+                    jokeDictionary[setup] = []
+                newList = jokeDictionary[setup]
+                newList.append(punchline)
+                jokeDictionary[setup] = newList
                 state = 6
             if state == 6:
                 data_out = data_out + "\nWould you like to continue using AJA? YES/NO"
-                print(data_out)
                 state = 7
             elif state == 7:
                 if command == "YES":
                     state = 0
                     break
                 elif command == "NO":
+                    write_dictionary(jokeDictionary)
                     return
 
             conn.send(data_out.encode())
+
 
     conn.close()
 
 
 if __name__ == '__main__':
-    Main()
+    main()
