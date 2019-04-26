@@ -3,13 +3,16 @@ import time
 
 
 def Main():
-    host = "127.0.0.1"
-    port = 5001
+    host = '127.0.0.1' #localhost
+    #host = "165.22.150.177" #server's host IP
+    port = 4001 #server listens on this port
 
     mySocket = socket.socket()
     mySocket.bind((host, port))
 
-    mySocket.listen(1)
+
+    mySocket.listen(2)
+    print("Running the socket project")
     conn, addr = mySocket.accept()
     print("Connection from: " + str(addr))
 
@@ -20,10 +23,13 @@ def Main():
         print("from connected  user: " + str(data))
 
         data = str(data).upper()
-        print("Received from User: " + str(data))
+        #print("Received from User: " + str(data))
 
-        data = input(" ? ")
-        conn.send(data.encode())
+        data_out = data
+        conn.send(data_out.encode())
+
+        if data == "EXIT":
+            break
 
     conn.close()
 
