@@ -1,8 +1,8 @@
 import socket
 
 def Main():
-    host = '127.0.0.1' #localhost
-    #host = '165.22.150.177' #server should be at this IP
+    #host = '127.0.0.1' #localhost
+    host = '165.22.150.177' #server should be at this IP
     port = 4001 #server should be listening on this port
 
     mySocket = socket.socket()
@@ -23,6 +23,7 @@ def Main():
         print(data)
         if not data:
             break
+    print("Connection to " + host + "on port " + port + " closed.")
     mySocket.close()
 
 if __name__ == '__main__':

@@ -1,9 +1,8 @@
 import socket
-import time
 import random
 
 
-def write_dictionary(dictionary):
+def write_dictionary(dictionary): #writes the jokes to the file as Setup | Punchline 1; Punchline 2; etc...
     file = open("jokefile.txt", "w")
     for key in dictionary:
         line = key + " | " + "; ".join(dictionary[key]) + "\n"
@@ -11,31 +10,36 @@ def write_dictionary(dictionary):
     file.close()
 
 def main():
-    host = '127.0.0.1' #localhost
-    #host = "165.22.150.177" #server's host IP
+    #host = '127.0.0.1' #localhost
+    host = "165.22.150.177" #server's host IP
     port = 4001 #server listens on this port
 
     jokeDictionary = {} #a dictionary to store all the jokes
     inputFile = open("jokefile.txt", "r") #file to save the jokes
 
     for aline in inputFile:  # go through each line of the input
-        setupList = [x.strip() for x in aline.split("|")]  # split the name from the classes
-        punchlineList = [x.strip() for x in setupList[1].split(";")]  # split the classes into their own items
+        setupList = [x.strip() for x in aline.split("|")]  # split the joke from punchline
+        punchlineList = [x.strip() for x in setupList[1].split(";")]  # split the different punchlines up if multiple
         if setupList[0] not in jokeDictionary:
             jokeDictionary[setupList[0]] = punchlineList
         else:
             jokeDictionary[setupList[0]] = jokeDictionary[setupList[0]] + punchlineList
 
-    print(jokeDictionary)
-    inputFile.close()
+    inputFile.close() #closes the input file since we are done reading
 
-    mySocket = socket.socket()
-    mySocket.bind((host, port))
+    while True:
+        mySocket = socket.socket() #creates the socket
+        mySocket.bind((host, port))#binds the socket to the IP and the port
 
 
-    mySocket.listen(2)
-    conn, addr = mySocket.accept()
-    print("Connection from: " + str(addr))
+        mySocket.listen(2)
+        conn, addr = mySocket.accept() #accepts connection
+        print("Connection from: " + str(addr))
+        aja(conn, jokeDictionary)
+        write_dictionary(jokeDictionary) #write the jokes to the file
+        mySocket.close() #closes the socket so a new one can be created for another instance of AJA
+
+def aja(conn, jokeDictionary):
     welcome = "Welcome to AJA!"
     state = 0
     """State key: 
@@ -54,166 +58,20 @@ def main():
         conn.send(instructions.encode())
         state = 1
 
-        while state != 0:
+        while state != 0: #keeps the cycle running until the user is done
             data = conn.recv(1024).decode()
             command = str(data).upper()
             if not data or command == "QUIT":
-                write_dictionary(jokeDictionary)
                 return #get out of connection loop
             if state == 1: #waiting on initial command
                 if command == "WHAT DOES AJA MEAN?":
-                    data_out = "(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A" \
-                               "(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A" \
-                               "(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A" \
-                               "(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A" \
-                               "(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A" \
-                               "(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A" \
-                               "(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A" \
-                               "(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A" \
-                               "(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A" \
-                               "(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A" \
-                               "(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A" \
-                               "(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A" \
-                               "(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A" \
-                               "(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A" \
-                               "(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A" \
-                               "(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(" \
-                               "A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(A(Aja's Joke Algorithm)Jok" \
-                               "e Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algor" \
-                               "ithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) J" \
-                               "oke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Alg" \
-                               "orithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)" \
-                               " Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke A" \
-                               "lgorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorith" \
-                               "m)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke" \
-                               " Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algori" \
-                               "thm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) Jo" \
-                               "ke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algo" \
-                               "rithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) " \
-                               "Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Al" \
-                               "gorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm" \
-                               ")ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke " \
-                               "Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorit" \
-                               "hm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) Jok" \
-                               "e Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algor" \
-                               "ithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) J" \
-                               "oke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Alg" \
-                               "orithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) " \
-                               "Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Al" \
-                               "gorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm" \
-                               ")ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke " \
-                               "Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorit" \
-                               "hm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) Jok" \
-                               "e Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algor" \
-                               "ithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) J" \
-                               "oke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Alg" \
-                               "orithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm" \
-                               ")ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke" \
-                               " Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algor" \
-                               "ithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) " \
-                               "Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke A" \
-                               "lgorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorith" \
-                               "m)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) Jok" \
-                               "e Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algo" \
-                               "rithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)" \
-                               " Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke " \
-                               "Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algori" \
-                               "thm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) J" \
-                               "oke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Al" \
-                               "gorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorith" \
-                               "m)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) Jok" \
-                               "e Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algo" \
-                               "rithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)" \
-                               " Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke " \
-                               "Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algori" \
-                               "thm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) J" \
-                               "oke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Al" \
-                               "gorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorith" \
-                               "m)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) Jok" \
-                               "e Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algo" \
-                               "rithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)" \
-                               " Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke " \
-                               "Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algori" \
-                               "thm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) J" \
-                               "oke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Al" \
-                               "gorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorith" \
-                               "m)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) Jok" \
-                               "e Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algo" \
-                               "rithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)" \
-                               " Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke " \
-                               "Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algori" \
-                               "thm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) J" \
-                               "oke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Al" \
-                               "gorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorith" \
-                               "m)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke" \
-                               " Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algor" \
-                               "ithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) " \
-                               "Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke A" \
-                               "lgorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorit" \
-                               "hm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) Jo" \
-                               "ke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Alg" \
-                               "orithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm" \
-                               ")ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke" \
-                               " Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algor" \
-                               "ithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) " \
-                               "Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke A" \
-                               "lgorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorit" \
-                               "hm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) Jo" \
-                               "ke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Alg" \
-                               "orithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm" \
-                               ")ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke" \
-                               " Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algor" \
-                               "ithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) " \
-                               "Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke A" \
-                               "lgorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorit" \
-                               "hm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) Jo" \
-                               "ke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Alg" \
-                               "orithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm" \
-                               ")ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke" \
-                               " Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algor" \
-                               "ithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) " \
-                               "Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke A" \
-                               "lgorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorit" \
-                               "hm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) Jo" \
-                               "ke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Alg" \
-                               "orithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm" \
-                               ")ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke" \
-                               " Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algor" \
-                               "ithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) J" \
-                               "oke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Al" \
-                               "gorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorith" \
-                               "m)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) Jok" \
-                               "e Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algo" \
-                               "rithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)" \
-                               " Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke " \
-                               "Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algori" \
-                               "thm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) J" \
-                               "oke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Al" \
-                               "gorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorith" \
-                               "m)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) Jok" \
-                               "e Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algo" \
-                               "rithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)" \
-                               " Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke " \
-                               "Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algori" \
-                               "thm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) J" \
-                               "oke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Al" \
-                               "gorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorith" \
-                               "m)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) Jok" \
-                               "e Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algo" \
-                               "rithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)" \
-                               " Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke " \
-                               "Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algori" \
-                               "thm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) J" \
-                               "oke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Al" \
-                               "gorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorith" \
-                               "m)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) Jok" \
-                               "e Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algo" \
-                               "rithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)" \
-                               " Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke " \
-                               "Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algori" \
-                               "thm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm)ja's Joke Algorithm) Jo" \
-                               "ke Algorithm)ja's Joke Algorithm)" \
-                               "\n........................Sorry, I got a bit lost in the recursion there."
+                    data_out = ""
+                    randomNum = random.randint(550, 850) #generates a random number to be used by the "recursion" joke
+                    for x in range(0, randomNum):
+                        data_out = data_out + "(A"
+                    for x in range(0, randomNum):
+                        data_out = data_out + "ja's Joke Algorithm)"
+                    data_out = data_out + "\n........................Sorry, I got a bit lost in the recursion there."
                     state = 6
                 elif command == "JOKE PLEASE":
                     data_out = "Knock knock"
@@ -227,14 +85,14 @@ def main():
 
             elif state == 2:#user has joke please path
                 if command == "WHO'S THERE?":
-                    setup = random.choice(list(jokeDictionary))
+                    setup = random.choice(list(jokeDictionary)) #picks random setup to joke
                     data_out = setup
                     state = 3
                 else:
                     data_out = "Sorry, that is not a valid command. Try: WHO'S THERE?, or type QUIT to quit"
             elif state == 3:
                 if command == str(setup).upper() + " WHO?":
-                    randomNum = random.randint(0, len(jokeDictionary[setup]) - 1)
+                    randomNum = random.randint(0, len(jokeDictionary[setup]) - 1) #picks random punchline if joke has multiple
                     punchline = jokeDictionary[setup][randomNum]
                     data_out = punchline
                     state = 6
@@ -248,10 +106,10 @@ def main():
                 state = 5
             elif state == 5:
                 punchline = data
-                if setup not in jokeDictionary:
+                if setup not in jokeDictionary: #checks if the setup is already in the dictionary
                     jokeDictionary[setup] = []
-                newList = jokeDictionary[setup]
-                newList.append(punchline)
+                newList = jokeDictionary[setup] #create new list to be able to manipulate the list in the dictionary
+                newList.append(punchline) #adds the new punchline to list
                 jokeDictionary[setup] = newList
                 state = 6
             if state == 6:
@@ -262,13 +120,12 @@ def main():
                     state = 0
                     break
                 elif command == "NO":
-                    write_dictionary(jokeDictionary)
+                    conn.close() #closes the connection
                     return
 
-            conn.send(data_out.encode())
+            conn.send(data_out.encode()) #sends whatever string data is pertinent
 
 
-    conn.close()
 
 
 if __name__ == '__main__':
