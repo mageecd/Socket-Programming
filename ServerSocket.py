@@ -29,6 +29,7 @@ def main():
 
     while True:
         mySocket = socket.socket() #creates the socket
+        mySocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # allows the address to be reused without waiting on timeout
         mySocket.bind((host, port))#binds the socket to the IP and the port
 
 
@@ -66,7 +67,7 @@ def aja(conn, jokeDictionary):
             if state == 1: #waiting on initial command
                 if command == "WHAT DOES AJA MEAN?":
                     data_out = ""
-                    randomNum = random.randint(550, 850) #generates a random number to be used by the "recursion" joke
+                    randomNum = random.randint(550, 700) #generates a random number to be used by the "recursion" joke
                     for x in range(0, randomNum):
                         data_out = data_out + "(A"
                     for x in range(0, randomNum):

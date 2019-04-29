@@ -23,7 +23,7 @@ def Main():
         print(data)
         if not data:
             break
-    print("Connection to " + host + "on port " + port + " closed.")
+    print("Connection to " + host + "on port " + str(port) + " closed.")
     mySocket.close()
 
 if __name__ == '__main__':
