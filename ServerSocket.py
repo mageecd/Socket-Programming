@@ -1,3 +1,5 @@
+"""This is the Server Side for my networking socket programming project.
+Socket project guide: https://www.techbeamers.com/python-tutorial-essentials-of-python-socket-programming/"""
 import socket
 import random
 
@@ -10,8 +12,8 @@ def write_dictionary(dictionary): #writes the jokes to the file as Setup | Punch
     file.close()
 
 def main():
-    #host = '127.0.0.1' #localhost
-    host = "165.22.150.177" #server's host IP
+    host = '127.0.0.1' #localhost
+    #host = "165.22.150.177" #server's host IP
     port = 4001 #server listens on this port
 
     jokeDictionary = {} #a dictionary to store all the jokes
@@ -28,7 +30,7 @@ def main():
     inputFile.close() #closes the input file since we are done reading
 
     while True:
-        mySocket = socket.socket() #creates the socket
+        mySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #creates the TCP socket
         mySocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # allows the address to be reused without waiting on timeout
         mySocket.bind((host, port))#binds the socket to the IP and the port
 
